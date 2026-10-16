@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" href="{{ url_for('profile') }}">Student Portal</a>
+    <a class="logout" href="{{ url_for('logout') }}">Log out</a>
+</header>
+<main class="dashboard">
+    <section class="welcome card">
+        <div><p class="eyebrow">YOUR DASHBOARD</p><h1>Hello, {{ student['name'] }}</h1><p class="muted">Here is your student profile.</p></div>
+        <div class="timebox"><span class="muted">Local time</span><strong id="live-time">--:--:--</strong></div>
+    </section>
+    <section class="card profile-card">
+        <div class="section-heading"><div><p class="eyebrow">PROFILE DETAILS</p><h2>Student information</h2></div><button id="toggle-details" class="button secondary" type="button">Show/Hide Details</button></div>
+        <div id="profile-details" class="details-grid">
+            <div class="detail"><span>Full name</span><strong>{{ student['name'] }}</strong></div>
+            <div class="detail"><span>Email</span><strong>{{ student['email'] }}</strong></div>
+            <div class="detail"><span>Age</span><strong>{{ student['age'] }}</strong></div>
+            <div class="detail"><span>Course</span><strong id="course-value">{{ student['course'] }}</strong></div>
+        </div>
+    </section>
+    <section class="card course-card">
+        <p class="eyebrow">KEEP IT UP TO DATE</p><h2>Update your course</h2>
+        <label for="course-select">Course</label>
+        <select id="course-select">
+            {% for course in ['Computer Science', 'Business', 'Design', 'Engineering', 'Data Science'] %}
+            <option value="{{ course }}" {% if student['course'] == course %}selected{% endif %}>{{ course }}</option>
+            {% endfor %}
+        </select>
+        <p id="toast" class="notice" role="status" hidden></p>
+    </section>
+</main>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+function updateTime() {
+    document.getElementById('live-time').textContent = new Date().toLocaleTimeString();
+}
+updateTime();
+setInterval(updateTime, 1000);
+
+$('#toggle-details').on('click', function () {
+    $('#profile-details').slideToggle(180);
+});
+
+$('#course-select').on('change', function () {
+    const course = $(this).val();
+    $.post('{{ url_for("update_course") }}', { course: course })
+        .done(function (response) {
+            $('#course-value').text(response.course);
+            $('#toast').removeClass('error').text(response.message).prop('hidden', false);
+        })
+        .fail(function (response) {
+            const message = response.responseJSON && response.responseJSON.error
+                ? response.responseJSON.error : 'Course could not be updated.';
+            $('#toast').addClass('error').text(message).prop('hidden', false);
+        });
+});
+</script>
+</body>
+</html>

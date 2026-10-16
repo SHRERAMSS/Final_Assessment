@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Student Registration</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<main class="shell">
+    <section class="card form-card">
+        <p class="eyebrow">STUDENT PORTAL</p>
+        <h1>Create your account</h1>
+        <p class="muted">Register to access your student profile.</p>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}<p class="notice {{ category }}">{{ message }}</p>{% endfor %}
+        {% endwith %}
+        <form id="register-form" method="post" novalidate>
+            <label for="name">Full name</label>
+            <input id="name" name="name" type="text" autocomplete="name" required value="{{ request.form.get('name', '') }}">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" required value="{{ request.form.get('email', '') }}">
+            <div class="row">
+                <div><label for="age">Age</label><input id="age" name="age" type="number" min="1" required value="{{ request.form.get('age', '') }}"></div>
+                <div><label for="gender">Gender</label><select id="gender" name="gender" required><option value="">Choose</option><option>Female</option><option>Male</option><option>Non-binary</option><option>Prefer not to say</option></select></div>
+            </div>
+            <label for="course">Course</label>
+            <select id="course" name="course" required>
+                <option value="">Choose a course</option><option>Computer Science</option><option>Business</option><option>Design</option><option>Engineering</option><option>Data Science</option>
+            </select>
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" minlength="6" autocomplete="new-password" required>
+            <p id="form-message" class="notice error" hidden></p>
+            <button class="button" type="submit">Register</button>
+        </form>
+        <p class="muted center">Already registered? <a href="{{ url_for('login') }}">Log in</a></p>
+    </section>
+</main>
+<script>
+document.getElementById('register-form').addEventListener('submit', function (event) {
+    const form = event.currentTarget;
+    const message = document.getElementById('form-message');
+    const age = document.getElementById('age').value.trim();
+    const password = document.getElementById('password').value;
+    message.hidden = true;
+    if (!form.checkValidity()) {
+        event.preventDefault();
+        message.textContent = 'Please complete all fields with valid information.';
+        message.hidden = false;
+    } else if (!/^\d+$/.test(age)) {
+        event.preventDefault();
+        message.textContent = 'Age must be a number.';
+        message.hidden = false;
+    } else if (password.length < 6) {
+        event.preventDefault();
+        message.textContent = 'Password must be at least 6 characters.';
+        message.hidden = false;
+    }
+});
+</script>
+</body>
+</html>
